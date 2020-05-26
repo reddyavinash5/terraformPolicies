@@ -2,10 +2,14 @@ provider "azurerm" {
   version = "=2.0.0"
   features {}
 }
+variable "allowed_locations" {
+  type    = list(string)
+  default = ["eastus", "eastus2", "westus"]
+}
 
 variable "policy_prefix" {
   type    = string
-  default = "/providers/Microsoft.Management/managementgroups/OneAladdin/providers/Microsoft.Authorization/policyDefinitions"
+  default = "/providers/Microsoft.Management/managementgroups/MG1/providers/Microsoft.Authorization/policyDefinitions"
 }
 
 variable "blk_allowed_locs_definition_id" {
@@ -24,4 +28,11 @@ resource "azurerm_policy_assignment" "blk_allowed_locations" {
   policy_definition_id = format("%s/%s", var.policy_prefix, var.blk_allowed_locs_definition_id)
   description          = "Policy to enforce list of allowed locations"
   display_name         = "Policy to enforce list of allowed locations at subscription level"
+
+  parameters = jsonencode(
+    {
+      "listOfAllowedLocations" : {
+        "value" : var.allowed_locations
+      }
+  })
 }
